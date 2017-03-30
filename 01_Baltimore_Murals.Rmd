@@ -1,0 +1,42 @@
+---
+title: "Baltimore Murals"
+author: "Leanne Fortney"
+date: "March 29, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(sp)                  # the older, more stable way
+library(sf)                  # the newer, easier way
+library(leaflet)             # for mapping
+library(scales)              # for scales
+library(tidyverse)
+```
+```{r}
+murals <- read_csv("~/Desktop/School/Clio2/Baltimore City/Baltimore_Murals/Baltimore_City_Murals.csv",
+   n_max = 7,
+    col_types =  cols(
+    location = col_character(),
+    artistFirstName = col_character(),
+    artistLastName = col_character(),
+    YEAR = col_integer(),
+    'Location 1' = col_character()
+  ))
+```
+---
+  Adding text here test
+---
+```{r}
+select(murals, YEAR, artistFirstName, artistLastName, long, lat) 
+leaflet(murals) %>% 
+  addTiles() %>% 
+  addCircleMarkers(data=murals,
+                   lng = ~long, lat = ~lat,
+                   label = ~paste(artistFirstName, artistLastName, 
+                                  YEAR), 
+                   color= "#257719") 
+```
