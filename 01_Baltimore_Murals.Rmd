@@ -10,33 +10,38 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-library(sp)                  # the older, more stable way
-library(sf)                  # the newer, easier way
-library(leaflet)             # for mapping
-library(scales)              # for scales
+
+library(sf)                  
+library(leaflet)            
+library(scales)             
 library(tidyverse)
+library(cleanNLP)
+library(ggmap)
 ```
 ```{r}
 murals <- read_csv("~/Desktop/School/Clio2/Baltimore City/Baltimore_Murals/Baltimore_City_Murals.csv",
-   n_max = 7,
     col_types =  cols(
     location = col_character(),
     artistFirstName = col_character(),
     artistLastName = col_character(),
-    YEAR = col_integer(),
-    'Location 1' = col_character()
+    YEAR = col_integer()
   ))
 ```
----
-  Adding text here test
----
+
 ```{r}
-select(murals, YEAR, artistFirstName, artistLastName, long, lat) 
-leaflet(murals) %>% 
-  addTiles() %>% 
-  addCircleMarkers(data=murals,
-                   lng = ~long, lat = ~lat,
-                   label = ~paste(artistFirstName, artistLastName, 
-                                  YEAR), 
-                   color= "#257719") 
+	
+murals %>% 
+select(artistFirstName, artistLastName, location, YEAR)
+mutate(murals, 
+       artist_Name = paste(artistLastName, artistFirstName, sep = ", ")) %>% 
+select(artist_Name, location, YEAR)
+to_geocode <- murals
+coords <- geocode(to_geocode$location, output = "latlona")
+address_coords <- bind_cols(to_geocode, coords) 
+
+murals %>% 
+  left_join(address_coords, by = c("location")) %>% 
+  filter(!is.na(lat) & !is.na(lon)) %>% View
+
 ```
+
